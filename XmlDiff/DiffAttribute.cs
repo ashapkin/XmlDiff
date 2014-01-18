@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Text;
 using System.Xml.Linq;
+using XmlDiff.Visitors;
 
 namespace XmlDiff
 {
@@ -18,10 +18,21 @@ namespace XmlDiff
 		public DiffAction Action { get; private set; }
 		public XAttribute Raw { get; private set; }
 
-		protected internal override void AppendSelfToSb(StringBuilder sb, int level)
+		public override void Accept(IDiffVisitor visitor)
 		{
-			sb.AppendFormat("{0}{1} Attribute: \"{2}\" with value: \"{3}\"\r\n",
-				BuildIndent(level), ActionToString(Action), Raw.Name, Raw.Value);
+			visitor.Visit(this);
+		}
+
+		public override void Accept<T>(IDiffParamsVisitor<T> visitor, T param)
+		{
+			visitor.Visit(this, param);
+		}
+
+		public override string ToString()
+		{
+			var visitor = new ToStringVisitor();
+			visitor.Visit(this, 0);
+			return visitor.Result;
 		}
 	}
 }

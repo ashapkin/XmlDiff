@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using NUnit.Framework;
 
 namespace XmlDiff.Tests
@@ -28,18 +27,7 @@ namespace XmlDiff.Tests
 		}
 
 		[Test]
-		public void AppendSelfToSb_ReturnStringRepresentation_WithIndent()
-		{
-			var diffVal = new DiffValue(DiffAction.Removed, Raw);
-			var sb = new StringBuilder();
-			diffVal.AppendSelfToSb(sb, 1);
-			string result = sb.ToString();
-			string expected = "...- Value: \"theValue\"\r\n";
-			Assert.AreEqual(expected, result);
-		}
-
-		[Test]
-		public void ToString_ReturnStringRepresentation_WithoutIndent()
+		public void ToString_ReturnStringRepresentation()
 		{
 			var diffVal = new DiffValue(DiffAction.Added, Raw);
 			string result = diffVal.ToString();

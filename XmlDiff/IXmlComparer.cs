@@ -4,6 +4,6 @@ namespace XmlDiff
 {
 	public interface IXmlComparer
 	{
-		DiffNode Compare(XElement source, XElement result);
+		DiffNode Compare(XElement sourceElement, XElement resultElement);
 	}
 }

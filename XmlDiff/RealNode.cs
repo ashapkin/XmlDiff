@@ -42,13 +42,13 @@ namespace XmlDiff
 				return node.CompareWith(this);
 			}
 
-			var contentChanges = attributeChanges(node)
-				.Concat(valueChanges(node))
-				.Concat(childsChanges(node));
+			var contentChanges = AttributeChanges(node)
+				.Concat(ValueChanges(node))
+				.Concat(ChildsChanges(node));
 			return new DiffNode(Raw, contentChanges);
 		}
 
-		private IEnumerable<DiffContent> attributeChanges(RealNode node)
+		private IEnumerable<DiffContent> AttributeChanges(RealNode node)
 		{
 			var pair = Pair.Create(node.Attributes, node.DefaultAction, Attributes, DefaultAction);
 			return pair.Apply((source, res, action) =>
@@ -59,7 +59,7 @@ namespace XmlDiff
 				});
 		}
 
-		private IEnumerable<DiffContent> valueChanges(RealNode node)
+		private IEnumerable<DiffContent> ValueChanges(RealNode node)
 		{
 			var pair = Pair.Create(node.Value, node.DefaultAction, Value, DefaultAction);
 			return pair.Apply((source, res, action) =>
@@ -70,15 +70,15 @@ namespace XmlDiff
 				});
 		}
 
-		private IEnumerable<DiffContent> childsChanges(RealNode node)
+		private IEnumerable<DiffContent> ChildsChanges(RealNode node)
 		{
-			var childs = zip(node.Childs, Childs)
+			var childs = Zip(node.Childs, Childs)
 				.Select(x => x.Result.CompareWith(x.Source))
 				.Where(x => x.IsChanged);
 			return childs;
 		}
 
-		private static IEnumerable<Pair<INode>> zip(
+		private static IEnumerable<Pair<INode>> Zip(
 			Dictionary<IndexedName, RealNode> source, Dictionary<IndexedName, RealNode> result)
 		{
 			foreach (var sourcePair in source)

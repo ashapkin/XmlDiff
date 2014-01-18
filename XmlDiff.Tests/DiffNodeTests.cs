@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 using NUnit.Framework;
 
@@ -60,18 +59,7 @@ namespace XmlDiff.Tests
 		}
 
 		[Test]
-		public void AppendSelfToSb_ReturnStringRepresentation_WithIndent()
-		{
-			var diffNode = new DiffNode(DiffAction.Removed, new XElement("some"));
-			var sb = new StringBuilder();
-			diffNode.AppendSelfToSb(sb, 3);
-			string result = sb.ToString();
-			string expected = ".........- Element \"some\"\r\n";
-			Assert.AreEqual(expected, result);
-		}
-
-		[Test]
-		public void ToString_ReturnStringRepresentation_WithoutIndent()
+		public void ToString_ReturnStringRepresentation()
 		{
 			var child = new DiffNode(DiffAction.Added, new XElement("child"));
 			var diffAttr = new DiffNode(new XElement("root"), new DiffContent[] { child });

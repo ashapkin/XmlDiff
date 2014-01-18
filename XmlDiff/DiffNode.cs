@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
+using XmlDiff.Visitors;
 
 namespace XmlDiff
 {
 	public class DiffNode : DiffContent
 	{
-		private readonly static int MaxAttributesPreviewCount = 2;
-
 		public DiffNode(DiffAction action, XElement raw)
 			: this(raw, null)
 		{
@@ -41,33 +39,21 @@ namespace XmlDiff
 			}
 		}
 
-		protected internal override void AppendSelfToSb(StringBuilder sb, int level)
+		public override void Accept(IDiffVisitor visitor)
 		{
-			if (IsChanged)
-			{
-				sb.AppendFormat("{0}{1} Element \"{2}\"", BuildIndent(level), ActionToString(DiffAction), Raw.Name);
-				AppendRawAttributesToSb(sb);
-				sb.Append("\r\n");
-				if (DiffAction == null)
-				{
-					foreach (DiffContent content in Content)
-					{
-						content.AppendSelfToSb(sb, level + 1);
-					}
-				}
-			}
+			visitor.Visit(this);
 		}
 
-		//to make a distinguish between even tags
-		private void AppendRawAttributesToSb(StringBuilder sb)
+		public override void Accept<T>(IDiffParamsVisitor<T> visitor, T param)
 		{
-			if (Raw.HasAttributes)
-			{
-				foreach (XAttribute attr in Raw.Attributes().Take(MaxAttributesPreviewCount))
-				{
-					sb.AppendFormat(" \"{0}\"=\"{1}\"", attr.Name, attr.Value);
-				}
-			}
+			visitor.Visit(this, param);
+		}
+
+		public override string ToString()
+		{
+			var visitor = new ToStringVisitor();
+			visitor.Visit(this, 0);
+			return visitor.Result;
 		}
 
 		//just for easier testing

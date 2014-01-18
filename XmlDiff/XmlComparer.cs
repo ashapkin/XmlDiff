@@ -33,30 +33,30 @@ namespace XmlDiff
 				throw new InvalidOperationException("Root elements are different");
 			}
 
-			RealNode parsedSource = parse(sourceElement, DiffAction.Removed);
-			RealNode parsedResult = parse(resultElement, DiffAction.Added);
+			RealNode parsedSource = Parse(sourceElement, DiffAction.Removed);
+			RealNode parsedResult = Parse(resultElement, DiffAction.Added);
 			return parsedResult.CompareWith(parsedSource);
 		}
 
-		private static RealNode parse(XElement elem, DiffAction defaultAction)
+		private static RealNode Parse(XElement elem, DiffAction defaultAction)
 		{
 			Dictionary<IndexedName, RealNode> childs = elem.HasElements
-				? parseChilds(elem, defaultAction)
+				? ParseChilds(elem, defaultAction)
 				: new Dictionary<IndexedName, RealNode>();
 			Dictionary<XName, XAttribute> attributes = elem.Attributes().ToDictionary(x => x.Name, x => x);
-			return new RealNode(defaultAction, elem, getTextValue(elem), attributes, childs);
+			return new RealNode(defaultAction, elem, GetTextValue(elem), attributes, childs);
 		}
 
-		private static Dictionary<IndexedName, RealNode> parseChilds(XElement elem, DiffAction defaultAction)
+		private static Dictionary<IndexedName, RealNode> ParseChilds(XElement elem, DiffAction defaultAction)
 		{
 			return elem.Elements()
-					.Select(x => parse(x, defaultAction))
+					.Select(x => Parse(x, defaultAction))
 					.GroupBy(x => x.Raw.Name)
-					.Aggregate(Enumerable.Empty<KeyValuePair<IndexedName, RealNode>>(), reduce_group)
+					.Aggregate(Enumerable.Empty<KeyValuePair<IndexedName, RealNode>>(), ReduceGroup)
 					.ToDictionary(x => x.Key, x => x.Value);
 		}
 
-		private static IEnumerable<KeyValuePair<IndexedName, RealNode>> reduce_group(
+		private static IEnumerable<KeyValuePair<IndexedName, RealNode>> ReduceGroup(
 			IEnumerable<KeyValuePair<IndexedName, RealNode>> aggr, IGrouping<XName, RealNode> items)
 		{
 			var addition = items.Select((elem, i) =>
@@ -64,7 +64,7 @@ namespace XmlDiff
 			return aggr.Concat(addition);
 		}
 
-		private static string getTextValue(XElement elem)
+		private static string GetTextValue(XElement elem)
 		{
 			return string.Join("", elem.Nodes().OfType<XText>().Select(x => x.Value));
 		}
