@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Xml.Linq;
 
 namespace XmlDiff
@@ -7,6 +8,9 @@ namespace XmlDiff
 	{
 		public DiffAttribute(DiffAction action, XAttribute raw)
 		{
+			if (raw == null)
+				throw new ArgumentNullException("raw");
+
 			Action = action;
 			Raw = raw;
 		}

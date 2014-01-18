@@ -1,7 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDiff", "XmlDiff\XmlDiff.csproj", "{F43EBA70-3C26-409C-BD58-2E87A4A8D009}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDiff.Tests", "XmlDiff.Tests\XmlDiff.Tests.csproj", "{BF7F39C1-E144-4590-8755-6883A3557B43}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +15,10 @@ Global
 		{F43EBA70-3C26-409C-BD58-2E87A4A8D009}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F43EBA70-3C26-409C-BD58-2E87A4A8D009}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F43EBA70-3C26-409C-BD58-2E87A4A8D009}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF7F39C1-E144-4590-8755-6883A3557B43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF7F39C1-E144-4590-8755-6883A3557B43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF7F39C1-E144-4590-8755-6883A3557B43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF7F39C1-E144-4590-8755-6883A3557B43}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

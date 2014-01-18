@@ -8,7 +8,7 @@ namespace XmlDiff
 {
 	public class DiffNode : DiffContent
 	{
-		private readonly int MaxAttributesPreviewCount = 2;
+		private readonly static int MaxAttributesPreviewCount = 2;
 
 		public DiffNode(DiffAction action, XElement raw)
 			: this(raw, null)
@@ -19,9 +19,8 @@ namespace XmlDiff
 		public DiffNode(XElement raw, IEnumerable<DiffContent> content)
 		{
 			if (raw == null)
-			{
 				throw new ArgumentNullException("raw");
-			}
+
 			Raw = raw;
 			Content = content ?? Enumerable.Empty<DiffContent>();
 		}

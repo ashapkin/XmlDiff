@@ -7,16 +7,18 @@ namespace XmlDiff
 {
 	internal sealed class RealNode : INode
 	{
-		public RealNode(DiffAction defaultAction, XElement raw,
+		public RealNode(DiffAction defaultAction, XElement raw, string value,
 			Dictionary<XName, XAttribute> attrs, Dictionary<IndexedName, RealNode> childs)
 		{
 			DefaultAction = defaultAction;
 			Raw = raw;
+			Value = value;
 			Childs = childs;
 			Attributes = attrs;
 		}
 
 		public XElement Raw { get; private set; }
+		public string Value { get; private set; }
 		public Dictionary<XName, XAttribute> Attributes { get; private set; }
 		public Dictionary<IndexedName, RealNode> Childs { get; private set; }
 		public DiffAction DefaultAction { get; private set; }
@@ -49,28 +51,23 @@ namespace XmlDiff
 		private IEnumerable<DiffContent> attributeChanges(RealNode node)
 		{
 			var pair = Pair.Create(node.Attributes, node.DefaultAction, Attributes, DefaultAction);
-			return pair.Apply((source, result, action) =>
+			return pair.Apply((source, res, action) =>
 				{
 					return source
-						.Where(x => !result.ContainsKey(x.Key) || result[x.Key].ToString() != x.Value.ToString())
+						.Where(x => !res.ContainsKey(x.Key) || res[x.Key].ToString() != x.Value.ToString())
 						.Select(x => new DiffAttribute(action, x.Value));
 				});
 		}
 
 		private IEnumerable<DiffContent> valueChanges(RealNode node)
 		{
-			var pair = Pair.Create(getTextValue(node.Raw), node.DefaultAction, getTextValue(Raw), DefaultAction);
-			return pair.Apply((source, result, action) =>
+			var pair = Pair.Create(node.Value, node.DefaultAction, Value, DefaultAction);
+			return pair.Apply((source, res, action) =>
 				{
-					return source != result && !string.IsNullOrEmpty(source)
+					return source != res && !string.IsNullOrEmpty(source)
 						? new DiffValue[] { new DiffValue(action, source) }
 						: new DiffValue[0];
 				});
-		}
-
-		private static string getTextValue(XElement elem)
-		{
-			return string.Join("", elem.Nodes().OfType<XText>().Select(x => x.Value));
 		}
 
 		private IEnumerable<DiffContent> childsChanges(RealNode node)

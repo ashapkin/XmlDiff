@@ -44,7 +44,7 @@ namespace XmlDiff
 				? parseChilds(elem, defaultAction)
 				: new Dictionary<IndexedName, RealNode>();
 			Dictionary<XName, XAttribute> attributes = elem.Attributes().ToDictionary(x => x.Name, x => x);
-			return new RealNode(defaultAction, elem, attributes, childs);
+			return new RealNode(defaultAction, elem, getTextValue(elem), attributes, childs);
 		}
 
 		private static Dictionary<IndexedName, RealNode> parseChilds(XElement elem, DiffAction defaultAction)
@@ -62,6 +62,11 @@ namespace XmlDiff
 			var addition = items.Select((elem, i) =>
 				new KeyValuePair<IndexedName, RealNode>(new IndexedName(items.Key, i), elem));
 			return aggr.Concat(addition);
+		}
+
+		private static string getTextValue(XElement elem)
+		{
+			return string.Join("", elem.Nodes().OfType<XText>().Select(x => x.Value));
 		}
 	}
 }

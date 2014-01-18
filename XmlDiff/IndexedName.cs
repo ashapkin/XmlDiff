@@ -10,6 +10,7 @@ namespace XmlDiff
 			Name = name;
 			Index = index;
 		}
+
 		public XName Name { get; private set; }
 		public int Index { get; private set; }
 
