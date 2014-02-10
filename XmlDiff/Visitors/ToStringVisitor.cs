@@ -45,6 +45,11 @@ namespace XmlDiff.Visitors
 			}
 		}
 
+		public void VisitWithDefaultSettings(DiffNode node)
+		{
+			Visit(node, 0);
+		}
+
 		private void AppendRawAttributesToSb(DiffNode node, StringBuilder sb)
 		{
 			if (node.Raw.HasAttributes)

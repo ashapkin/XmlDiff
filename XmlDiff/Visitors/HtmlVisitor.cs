@@ -6,16 +6,24 @@ namespace XmlDiff.Visitors
 {
 	public class HtmlVisitor : IDiffParamsVisitor<int>
 	{
-		protected readonly int MaxAttributesPreviewCount = 2;
-		protected readonly string Styles =
-			string.Join(string.Empty,
-			"<style type=\"text/css\">",
-			"span { margin:5px;}",
-			".removed { background-color : #ffe6e6; }",
-			".added { background-color : #e6ffe6; }",
-			"</style>");
+		protected int MaxAttributesPreviewCount { get { return 2; } }
+		protected virtual string Styles
+		{
+			get
+			{
+				return
+					string.Join(string.Empty,
+					"<style type=\"text/css\">",
+					"span { margin:5px;}",
+					".removed { background-color : #ffe6e6; text-decoration:line-through; }",
+					".added { background-color : #e6ffe6; }",
+					"</style>");
+			}
+		}
 
 		private readonly StringBuilder _sb = new StringBuilder();
+		private uint _lineNumber;
+		private bool _closeLineWithoutPrefixMode;
 
 		public HtmlVisitor()
 		{
@@ -27,45 +35,73 @@ namespace XmlDiff.Visitors
 			get { return _sb.ToString(); }
 		}
 
-		public void Visit(DiffAttribute attr, int level)
+		public void Visit(DiffAttribute attr, int param)
 		{
 			_sb.AppendFormat("<span{0}>\"{1}\"=\"{2}\"</span>",
 				ActionToString(attr.Action), attr.Raw.Name, attr.Raw.Value);
 		}
 
-		public void Visit(DiffValue val, int level)
+		public void Visit(DiffValue val, int param)
 		{
-			string indent = BuildIndent(level);
-			_sb.AppendFormat("{0}<span{0}>{1}</span>", indent, ActionToString(val.Action), val.Raw);
+			string indent = string.Empty;
+			if (!_closeLineWithoutPrefixMode)
+			{
+				DrawLineBreak();
+				indent = BuildIndent(param);
+				_closeLineWithoutPrefixMode = true;
+			}
+			_sb.AppendFormat("{0}<span{1}>{2}</span>", indent, ActionToString(val.Action), val.Raw);
 		}
 
-		public void Visit(DiffNode node, int level)
+		public void Visit(DiffNode node, int param)
 		{
-			if (level > 0)
-			{
-				_sb.Append("</div>");
-			}
+			DrawLineBreak();
 
-			string indent = BuildIndent(level);
+			string indent = BuildIndent(param);
 			string action = ActionToString(node.DiffAction);
-			_sb.Append("<div>");
 			_sb.AppendFormat("{0}<span{1}>&lt{2}", indent, action, node.Raw.Name);
+
 			if (node.DiffAction == null)
 			{
 				foreach (DiffContent content in node.Content)
 				{
-					content.Accept(this, level + 1);
+					content.Accept(this, param + 1);
 				}
-			}
-			else
+				DrawLineBreak();
+
+				string closingTag = string.Format("{0}<span{1}>&lt/{2}&gt", indent, action, node.Raw.Name);
+				DrawLineBreak(openNew: param != 0, closingPrefix: closingTag);
+				_closeLineWithoutPrefixMode = true;
+
+			} else
 			{
 				AppendRawAttributesToSb(node, _sb);
+				_sb.Append("/");
 			}
+		}
 
-			if (level == 0)
+		public void VisitWithDefaultSettings(DiffNode node)
+		{
+			Visit(node, 0);
+		}
+
+		private void DrawLineBreak(bool openNew = true, string closingPrefix = "&gt")
+		{
+			if (_lineNumber > 0)
 			{
+				if (!_closeLineWithoutPrefixMode)
+				{
+					_sb.Append(closingPrefix);
+				}
 				_sb.Append("</div>");
 			}
+			if (openNew)
+			{
+				_sb.Append("<div>");
+				_lineNumber++;
+			}
+
+			_closeLineWithoutPrefixMode = false;
 		}
 
 		private void AppendRawAttributesToSb(DiffNode node, StringBuilder sb)
@@ -84,8 +120,7 @@ namespace XmlDiff.Visitors
 				{
 					sb.Append("<span>...</span>");
 				}
-			}
-			else
+			} else
 			{
 				sb.Append("<span>...</span>");
 			}
