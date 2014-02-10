@@ -6,7 +6,7 @@ namespace XmlDiff.Visitors
 {
 	public class ToStringVisitor : IDiffParamsVisitor<int>
 	{
-		private static readonly int MaxAttributesPreviewCount = 2;
+		protected readonly int MaxAttributesPreviewCount = 2;
 		private readonly StringBuilder _sb = new StringBuilder();
 
 		public string Result
@@ -14,23 +14,20 @@ namespace XmlDiff.Visitors
 			get { return _sb.ToString(); }
 		}
 
-		public void Visit(DiffAttribute attr, int param)
+		public void Visit(DiffAttribute attr, int level)
 		{
-			int level = param;
 			_sb.AppendFormat("{0}{1} Attribute: \"{2}\" with value: \"{3}\"\r\n",
 				BuildIndent(level), ActionToString(attr.Action), attr.Raw.Name, attr.Raw.Value);
 		}
 
-		public void Visit(DiffValue val, int param)
+		public void Visit(DiffValue val, int level)
 		{
-			int level = param;
 			string indent = BuildIndent(level);
 			_sb.AppendFormat("{0}{1} Value: \"{2}\"\r\n", indent, ActionToString(val.Action), val.Raw);
 		}
 
-		public void Visit(DiffNode node, int param)
+		public void Visit(DiffNode node, int level)
 		{
-			int level = param;
 			if (node.IsChanged)
 			{
 				string indent = BuildIndent(level);
@@ -48,7 +45,12 @@ namespace XmlDiff.Visitors
 			}
 		}
 
-		private static void AppendRawAttributesToSb(DiffNode node, StringBuilder sb)
+		public void VisitWithDefaultSettings(DiffNode node)
+		{
+			Visit(node, 0);
+		}
+
+		private void AppendRawAttributesToSb(DiffNode node, StringBuilder sb)
 		{
 			if (node.Raw.HasAttributes)
 			{
