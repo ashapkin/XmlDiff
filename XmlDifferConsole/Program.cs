@@ -72,6 +72,11 @@ namespace XmlDifferConsole
                     vistor.VisitWithDefaultSettings(diff);
                     Console.WriteLine(vistor.Result);
                 }
+                {
+                    var vistor = new XdtVisitor();
+                    vistor.VisitWithDefaultSettings(diff);
+                    Console.WriteLine(vistor.Result);
+                }
             }
             finally
             {

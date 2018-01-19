@@ -6,5 +6,6 @@ namespace XmlDiff.Visitors
 		void Visit(DiffAttribute attr);
 		void Visit(DiffValue val);
 		void Visit(DiffNode node);
+		string Result { get; }
 	}
 }

@@ -45,6 +45,7 @@
     <Compile Include="DiffNode.cs" />
     <Compile Include="DiffValue.cs" />
     <Compile Include="EmptyNode.cs" />
+    <Compile Include="Visitors\XdtVisitor.cs" />
     <Compile Include="Visitors\HtmlVisitor.cs">
       <SubType>Code</SubType>
     </Compile>
