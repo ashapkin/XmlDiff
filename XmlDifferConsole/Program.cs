@@ -113,6 +113,7 @@ namespace XmlDifferConsole
 
             if (opt.Verbose)
                 Console.WriteLine("\nShowing text diff:");
+            if (opt.Verbose || (string.IsNullOrEmpty(opt.OutputHtmlFile) && string.IsNullOrEmpty(opt.OutputXdtFile)))
             {
                 var vistor = new ToStringVisitor();
                 vistor.VisitWithDefaultSettings(diff);
