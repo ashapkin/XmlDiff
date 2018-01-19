@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2010
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDiff", "XmlDiff\XmlDiff.csproj", "{F43EBA70-3C26-409C-BD58-2E87A4A8D009}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDiff.Tests", "XmlDiff.Tests\XmlDiff.Tests.csproj", "{BF7F39C1-E144-4590-8755-6883A3557B43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDifferConsole", "XmlDifferConsole\XmlDifferConsole.csproj", "{01A99209-5919-4202-87FA-F6E234812B9C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,8 +39,23 @@ Global
 		{BF7F39C1-E144-4590-8755-6883A3557B43}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{BF7F39C1-E144-4590-8755-6883A3557B43}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{BF7F39C1-E144-4590-8755-6883A3557B43}.Release|x86.ActiveCfg = Release|Any CPU
+		{01A99209-5919-4202-87FA-F6E234812B9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01A99209-5919-4202-87FA-F6E234812B9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01A99209-5919-4202-87FA-F6E234812B9C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{01A99209-5919-4202-87FA-F6E234812B9C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{01A99209-5919-4202-87FA-F6E234812B9C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{01A99209-5919-4202-87FA-F6E234812B9C}.Debug|x86.Build.0 = Debug|Any CPU
+		{01A99209-5919-4202-87FA-F6E234812B9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01A99209-5919-4202-87FA-F6E234812B9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01A99209-5919-4202-87FA-F6E234812B9C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{01A99209-5919-4202-87FA-F6E234812B9C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{01A99209-5919-4202-87FA-F6E234812B9C}.Release|x86.ActiveCfg = Release|Any CPU
+		{01A99209-5919-4202-87FA-F6E234812B9C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1491C259-066C-429D-A845-688BA84AF052}
 	EndGlobalSection
 EndGlobal
