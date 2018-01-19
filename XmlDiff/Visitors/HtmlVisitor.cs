@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
 
@@ -12,8 +13,8 @@ namespace XmlDiff.Visitors
 			get
 			{
 				return
-					string.Join(string.Empty,
-					"<style type=\"text/css\">",
+					string.Join(Environment.NewLine,
+					"<body><style type=\"text/css\">",
 					"span { margin:5px;}",
 					".removed { background-color : #ffe6e6; text-decoration:line-through; }",
 					".added { background-color : #e6ffe6; }",
@@ -83,6 +84,7 @@ namespace XmlDiff.Visitors
 		public void VisitWithDefaultSettings(DiffNode node)
 		{
 			Visit(node, 0);
+			_sb.Append("</body>");
 		}
 
 		private void DrawLineBreak(bool openNew = true, string closingPrefix = "&gt")
