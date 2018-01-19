@@ -58,6 +58,10 @@ namespace XmlDiff.Visitors
 				{
 					sb.AppendFormat(" \"{0}\"=\"{1}\"", attr.Name, attr.Value);
 				}
+				if (node.Raw.Attributes().Count() > MaxAttributesPreviewCount)
+				{
+					sb.AppendFormat("...");
+				}
 			}
 		}
 
@@ -74,16 +78,15 @@ namespace XmlDiff.Visitors
 
 		private static string ActionToString(DiffAction? diffAction)
 		{
-			if (diffAction == DiffAction.Added)
+			switch (diffAction)
 			{
-				return "+";
+				case DiffAction.Added:
+					return "+";
+				case DiffAction.Removed:
+					return "-";
+				default:
+					return "=";
 			}
-			if (diffAction == DiffAction.Removed)
-			{
-				return "-";
-			}
-
-			return "=";
 		}
 	}
 }
