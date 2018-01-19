@@ -8,7 +8,7 @@ namespace XmlDiff
 		public DiffValue(DiffAction action, string raw)
 		{
 			if (string.IsNullOrEmpty(raw))
-				throw new ArgumentNullException("raw");
+				throw new ArgumentNullException(nameof(raw));
 
 			Action = action;
 			Raw = raw;

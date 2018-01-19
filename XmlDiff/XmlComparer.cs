@@ -8,7 +8,7 @@ namespace XmlDiff
 	public class XmlComparer : IXmlComparer
 	{
 		/// <summary>
-		/// Compare <paramref name="resultElement"/> with a <paramref name="sourceElement"/> 
+		/// Compare <paramref name="resultElement"/> with a <paramref name="sourceElement"/>
 		/// Comparison is made only for XElement, XAttribute or XText elements
 		/// All other xml elements such as XComment, CDATA etc would be ignored
 		/// </summary>
@@ -22,11 +22,11 @@ namespace XmlDiff
 		{
 			if (sourceElement == null)
 			{
-				throw new ArgumentNullException("sourceElement");
+				throw new ArgumentNullException(nameof(sourceElement));
 			}
 			if (resultElement == null)
 			{
-				throw new ArgumentNullException("resultElement");
+				throw new ArgumentNullException(nameof(resultElement));
 			}
 			if (sourceElement.Name != resultElement.Name)
 			{

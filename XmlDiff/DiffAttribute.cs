@@ -8,11 +8,8 @@ namespace XmlDiff
 	{
 		public DiffAttribute(DiffAction action, XAttribute raw)
 		{
-			if (raw == null)
-				throw new ArgumentNullException("raw");
-
 			Action = action;
-			Raw = raw;
+			Raw = raw ?? throw new ArgumentNullException(nameof(raw));
 		}
 
 		public DiffAction Action { get; private set; }
