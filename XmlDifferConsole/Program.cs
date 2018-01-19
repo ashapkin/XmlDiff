@@ -1,4 +1,5 @@
-﻿using System;
+﻿using clipr;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Xml.Linq;
@@ -7,84 +8,115 @@ using XmlDiff.Visitors;
 
 namespace XmlDifferConsole
 {
+    //[ApplicationInfo(Description = "This is a set of options.")]
+    public class Options
+    {
+        [NamedArgument('v', "verbose",
+            Action = ParseAction.StoreTrue,
+            //Constraint = NumArgsConstraint.Optional,
+            Description = "Increase the verbosity of the output.")]
+        public bool Verbose { get; set; }
+
+        [PositionalArgument(0,
+            Description = "left input XML file.")]
+        public string LeftFile { get; set; }
+
+        [PositionalArgument(1,
+                    Description = "right input XML file.")]
+        public string RightFile { get; set; }
+
+        [NamedArgument("html", Action = ParseAction.Store,
+            //Constraint = NumArgsConstraint.Optional,
+            Description = "Output differences to HTML file.")]
+        public string OutputHtmlFile { get; set; }
+
+        [NamedArgument("xdt", Action = ParseAction.Store,
+            //Constraint = NumArgsConstraint.Optional,
+            Description = "Output XDocument Transformation file.")]
+        public string OutputXdtFile { get; set; }
+    }
+
     class Program
     {
         static void Main(string[] args)
         {
-            try
+            var opt = CliParser.StrictParse<Options>(args);
+            var stopwatch = new Stopwatch();
+
+            XDocument leftDoc = null;
+            XDocument rightDoc = null;
+            if (opt.Verbose)
             {
-                if (args.Length == 0)
-                {
-                    Console.WriteLine("Usage: {0} leftFile rightFile [outputHtmlFile]", AppDomain.CurrentDomain.FriendlyName);
-                    return;
-                }
-
-                var leftFile = args[0];
-                var rightFile = args[1];
-                var outputHTMLFile = string.Empty;
-                if (args.Length > 2)
-                    outputHTMLFile = args[2];
-
-                var verbose = true;
-                XDocument leftDoc = null;
-                XDocument rightDoc = null;
-                if (verbose)
-                    Console.WriteLine("Loading \"{0}\"...", leftFile);
-                leftDoc = XDocument.Load(leftFile);
-                if (verbose)
-                    Console.WriteLine("Loading \"{0}\"...", rightFile);
-                rightDoc = XDocument.Load(rightFile);
-
-                var stopwatch = new Stopwatch();
-                if (verbose)
-                {
-                    Console.WriteLine("Comparing differences...");
-                    stopwatch.Start();
-                }
-
-                var comparer = new XmlComparer();
-                var diff = comparer.Compare(leftDoc.Root, rightDoc.Root);
-                var isChanged = diff.IsChanged;
-
-                if (verbose)
-                {
-                    stopwatch.Stop();
-                    Console.WriteLine("Compared in {0} ms.", stopwatch.ElapsedMilliseconds);
-                }
-
-                if (!string.IsNullOrEmpty(outputHTMLFile))
-                {
-                    if (verbose)
-                        Console.WriteLine("Creating HTML output...");
-
-                    var visitor = new HtmlVisitor();
-                    visitor.VisitWithDefaultSettings(diff);
-
-                    if (verbose)
-                        Console.WriteLine("Writing HTML output to \"{0}\"...", outputHTMLFile);
-                    File.WriteAllText(outputHTMLFile, visitor.Result);
-                    if (verbose)
-                        Console.WriteLine("HTML output file created.");
-                }
-
-                {
-                    var vistor = new ToStringVisitor();
-                    vistor.VisitWithDefaultSettings(diff);
-                    Console.WriteLine(vistor.Result);
-                }
-                {
-                    var vistor = new XdtVisitor();
-                    vistor.VisitWithDefaultSettings(diff);
-                    Console.WriteLine(vistor.Result);
-                }
+                Console.WriteLine("Loading \"{0}\"...", opt.LeftFile);
+                stopwatch.Start();
             }
-            finally
+            leftDoc = XDocument.Load(opt.LeftFile);
+            if (opt.Verbose)
             {
-                if (Debugger.IsAttached)
+                Console.WriteLine("Loaded in {0} ms.", stopwatch.ElapsedMilliseconds);
+                Console.WriteLine("Loading \"{0}\"...", opt.RightFile);
+                stopwatch.Restart();
+            }
+            rightDoc = XDocument.Load(opt.RightFile);
+            if (opt.Verbose)
+            {
+                Console.WriteLine("Loaded in {0} ms.", stopwatch.ElapsedMilliseconds);
+                Console.WriteLine("Comparing differences...");
+                stopwatch.Restart();
+            }
+
+            var comparer = new XmlComparer();
+            var diff = comparer.Compare(leftDoc.Root, rightDoc.Root);
+            var isChanged = diff.IsChanged;
+
+            if (opt.Verbose)
+                Console.WriteLine("Compared in {0} ms.", stopwatch.ElapsedMilliseconds);
+
+            if (!string.IsNullOrEmpty(opt.OutputHtmlFile))
+            {
+                if (opt.Verbose)
                 {
-                    Console.WriteLine("Press any key to continue...");
-                    Console.ReadKey();
+                    Console.WriteLine("Creating HTML output...");
+                    stopwatch.Restart();
                 }
+
+                var visitor = new HtmlVisitor();
+                visitor.VisitWithDefaultSettings(diff);
+
+                if (opt.Verbose)
+                    Console.WriteLine("Writing HTML output to \"{0}\"...", opt.OutputHtmlFile);
+                File.WriteAllText(opt.OutputHtmlFile, visitor.Result);
+
+                if (opt.Verbose)
+                    Console.WriteLine("HTML output file created in {0} ms.", stopwatch.ElapsedMilliseconds);
+            }
+
+            if (!string.IsNullOrEmpty(opt.OutputXdtFile))
+            {
+                if (opt.Verbose)
+                {
+                    Console.WriteLine("Creating XDT output...");
+                    stopwatch.Restart();
+                }
+
+                var visitor = new XdtVisitor();
+                visitor.VisitWithDefaultSettings(diff);
+
+                if (opt.Verbose)
+                    Console.WriteLine("Writing XDT output to \"{0}\"...", opt.OutputXdtFile);
+                File.WriteAllText(opt.OutputXdtFile, visitor.Result);
+
+                if (opt.Verbose)
+                    Console.WriteLine("XDT output file created in {0} ms.", stopwatch.ElapsedMilliseconds);
+            }
+            stopwatch.Stop();
+
+            if (opt.Verbose)
+                Console.WriteLine("\nShowing text diff:");
+            {
+                var vistor = new ToStringVisitor();
+                vistor.VisitWithDefaultSettings(diff);
+                Console.WriteLine(vistor.Result);
             }
         }
     }

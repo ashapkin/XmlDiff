@@ -35,6 +35,9 @@
     <StartupObject>XmlDifferConsole.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="clipr, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\clipr.1.6.0.1\lib\net35\clipr.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
@@ -51,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XmlDiff\XmlDiff.csproj">
