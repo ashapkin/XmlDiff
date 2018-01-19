@@ -48,22 +48,18 @@ namespace XmlDifferConsole
             if (opt.Verbose)
             {
                 Console.WriteLine("Loading \"{0}\"...", opt.LeftFile);
-                stopwatch.Start();
             }
             leftDoc = XDocument.Load(opt.LeftFile);
             if (opt.Verbose)
             {
-                Console.WriteLine("Loaded in {0} ms.", stopwatch.ElapsedMilliseconds);
                 Console.WriteLine("Loading \"{0}\"...", opt.RightFile);
-                stopwatch.Restart();
             }
             rightDoc = XDocument.Load(opt.RightFile);
             if (opt.Verbose)
             {
-                Console.WriteLine("Loaded in {0} ms.", stopwatch.ElapsedMilliseconds);
                 Console.WriteLine("Comparing differences...");
-                stopwatch.Restart();
             }
+            stopwatch.Start();
 
             var comparer = new XmlComparer();
             var diff = comparer.Compare(leftDoc.Root, rightDoc.Root);
