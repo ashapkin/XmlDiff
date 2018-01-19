@@ -39,7 +39,7 @@ namespace XmlDiff.Visitors
 		public void Visit(DiffAttribute attr, int param)
 		{
 			_sb.AppendFormat("<span{0}>\"{1}\"=\"{2}\"</span>",
-				ActionToString(attr.Action), attr.Raw.Name, attr.Raw.Value);
+				ActionToString(attr.Action), attr.Raw.Name, System.Security.SecurityElement.Escape(attr.Raw.Value));
 		}
 
 		public void Visit(DiffValue val, int param)
@@ -51,7 +51,7 @@ namespace XmlDiff.Visitors
 				indent = BuildIndent(param);
 				_closeLineWithoutPrefixMode = true;
 			}
-			_sb.AppendFormat("{0}<span{1}>{2}</span>", indent, ActionToString(val.Action), val.Raw);
+			_sb.AppendFormat("{0}<span{1}>{2}</span>", indent, ActionToString(val.Action), System.Security.SecurityElement.Escape(val.Raw));
 		}
 
 		public void Visit(DiffNode node, int param)
@@ -60,17 +60,18 @@ namespace XmlDiff.Visitors
 
 			string indent = BuildIndent(param);
 			string action = ActionToString(node.DiffAction);
-			_sb.AppendFormat("{0}<span{1}>&lt{2}", indent, action, node.Raw.Name);
+			_sb.AppendFormat("{0}<span{1}>&lt;{2}", indent, action, node.Raw.Name);
 
 			if (node.DiffAction == null)
 			{
+				_sb.Append("</span>");
 				foreach (DiffContent content in node.Content)
 				{
 					content.Accept(this, param + 1);
 				}
 				DrawLineBreak();
 
-				string closingTag = string.Format("{0}<span{1}>&lt/{2}&gt", indent, action, node.Raw.Name);
+				string closingTag = string.Format("{0}<span{1}>&lt;/{2}&gt;</span>", indent, action, node.Raw.Name);
 				DrawLineBreak(openNew: param != 0, closingPrefix: closingTag);
 				_closeLineWithoutPrefixMode = true;
 
@@ -78,6 +79,7 @@ namespace XmlDiff.Visitors
 			{
 				AppendRawAttributesToSb(node, _sb);
 				_sb.Append("/");
+				_sb.Append("</span>");
 			}
 		}
 
@@ -87,7 +89,7 @@ namespace XmlDiff.Visitors
 			_sb.Append("</body>");
 		}
 
-		private void DrawLineBreak(bool openNew = true, string closingPrefix = "&gt")
+		private void DrawLineBreak(bool openNew = true, string closingPrefix = "&gt;")
 		{
 			if (_lineNumber > 0)
 			{
@@ -103,6 +105,7 @@ namespace XmlDiff.Visitors
 				_lineNumber++;
 			}
 
+			_sb.Append(Environment.NewLine);
 			_closeLineWithoutPrefixMode = false;
 		}
 
@@ -115,7 +118,7 @@ namespace XmlDiff.Visitors
 				while (enumerator.MoveNext() && left > 0)
 				{
 					XAttribute attr = enumerator.Current;
-					sb.AppendFormat("<span>\"{0}\"=\"{1}\"</span>", attr.Name, attr.Value);
+					sb.AppendFormat("<span>\"{0}\"=\"{1}\"</span>", attr.Name, System.Security.SecurityElement.Escape(attr.Value));
 					left--;
 				}
 				if (enumerator.MoveNext())
@@ -124,7 +127,7 @@ namespace XmlDiff.Visitors
 				}
 			} else
 			{
-				sb.Append("<span>...</span>");
+				//sb.Append("<span>...</span>");
 			}
 		}
 
