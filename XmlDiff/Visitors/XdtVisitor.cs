@@ -38,7 +38,7 @@ namespace XmlDiff.Visitors
     {
         private readonly XDocument _xdt;
         private XElement _CurrentElement;
-        private const string _XdtNamespaceUri = "http://schemas.microsoft.com/XML-Document-Transform";
+        public const string _XdtNamespaceUri = "http://schemas.microsoft.com/XML-Document-Transform";
 
         public XdtVisitor()
         {
@@ -162,6 +162,7 @@ namespace XmlDiff.Visitors
 
         public void VisitWithDefaultSettings(DiffNode node)
         {
+            // TODO: should we reset internal variables / state so that the same visitor instance can be used for multiple diffs?
             Visit(node);
         }
     }
