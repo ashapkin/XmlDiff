@@ -134,7 +134,7 @@ namespace XmlDiff.Visitors
                         this._CurrentElement.Add(unique_attribute);
                         this._CurrentElement.SetAttributeValue(XName.Get("Locator", _XdtNamespaceUri), "Match(" + unique_attribute.Name + ")");
                     }
-                    else if (unchanged_attributes.Any() && siblings_with_same_name.Any())
+                    else if (/*unchanged_attributes.Any() &&*/ siblings_with_same_name.Any())
                     {
                         // there is at least one other sibling element with the same name, so locate this element using an XPath Condition of the index
                         this._CurrentElement.SetAttributeValue(XName.Get("Locator", _XdtNamespaceUri), "Condition([" + (node.Raw.NodesBeforeSelf().Count() + 1) + "])");
