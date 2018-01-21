@@ -86,11 +86,13 @@ namespace XmlDiff.Tests
         [Test]
         public void Xdt_TestNonUniqueElementNoUnchangedAttribute()
         {
-            var destDoc = new XDocument(_simpleDoc);
-            destDoc.Root.Element("appSettings").Elements().First().SetAttributeValue("value", "test value");
-            destDoc.Root.Element("appSettings").Elements().First().SetAttributeValue("key", "test_key");
+            var sourceDoc = new XDocument(_simpleDoc);
+            sourceDoc.Root.Element("appSettings").AddFirst(new XElement("test"));
+            var destDoc = new XDocument(sourceDoc);
+            destDoc.Root.Element("appSettings").Elements("add").First().SetAttributeValue("value", "test value");
+            destDoc.Root.Element("appSettings").Elements("add").First().SetAttributeValue("key", "test_key");
 
-            DiffNode output = _xmlDiff.Compare(_simpleDoc.Root, destDoc.Root);
+            DiffNode output = _xmlDiff.Compare(sourceDoc.Root, destDoc.Root);
 
             var visitor = new XdtVisitor();
             visitor.VisitWithDefaultSettings(output);
@@ -99,8 +101,8 @@ namespace XmlDiff.Tests
             // root element should have no locator or transformation
             Assert.IsNull(_FindXdtAttribute(result.Root));
             // changed element should be matched by a condition
-            Assert.AreEqual(_FindXdtAttribute(result.Root.Element("appSettings").Elements().First(), "Transform").Value, "SetAttributes(key,value)");
-            Assert.AreEqual(_FindXdtAttribute(result.Root.Element("appSettings").Elements().First(), "Locator").Value, "Condition([1])");
+            Assert.AreEqual(_FindXdtAttribute(result.Root.Element("appSettings").Elements("add").First(), "Transform").Value, "SetAttributes(key,value)");
+            Assert.AreEqual(_FindXdtAttribute(result.Root.Element("appSettings").Elements("add").First(), "Locator").Value, "Condition([1])");
         }
 
         [Test]

@@ -126,7 +126,9 @@ namespace XmlDiff.Visitors
                     // find an attribute whose name and value is the same in both documents
                     var unchanged_attributes = node.Raw.Attributes().Where(a => !set.Any(s => s.Attribute == a.Name) && !remove.Any(s => s.Attribute == a.Name)).ToArray();
                     // restrict that to unique entires
-                    var siblings_with_same_name = node.Raw.ElementsBeforeSelf().Concat(node.Raw.ElementsAfterSelf()).Where(e => e.Name == node.Raw.Name).ToArray();
+                    var prev_siblings_with_same_name = node.Raw.ElementsBeforeSelf().Where(e => e.Name == node.Raw.Name).ToArray();
+                    var next_siblings_with_same_name = node.Raw.ElementsAfterSelf().Where(e => e.Name == node.Raw.Name).ToArray();
+                    var siblings_with_same_name = prev_siblings_with_same_name.Concat(next_siblings_with_same_name);
                     var unique_attributes = unchanged_attributes.Where(a => siblings_with_same_name.All(e => e.Attribute(a.Name)?.Value != a.Value));
                     var unique_attribute = unchanged_attributes.FirstOrDefault();
                     if (unique_attribute != null)
@@ -137,7 +139,7 @@ namespace XmlDiff.Visitors
                     else if (/*unchanged_attributes.Any() &&*/ siblings_with_same_name.Any())
                     {
                         // there is at least one other sibling element with the same name, so locate this element using an XPath Condition of the index
-                        this._CurrentElement.SetAttributeValue(XName.Get("Locator", _XdtNamespaceUri), "Condition([" + (node.Raw.NodesBeforeSelf().Count() + 1) + "])");
+                        this._CurrentElement.SetAttributeValue(XName.Get("Locator", _XdtNamespaceUri), "Condition([" + (prev_siblings_with_same_name.Count() + 1) + "])");
                     } // otherwise, let the XDT transformer intelligently locate the correct element to transform
                     if (set.Any())
                         this._CurrentElement.SetAttributeValue(XName.Get("Transform", _XdtNamespaceUri), "SetAttributes(" + string.Join(",", set.Select(a => a.Attribute)) + ")");
