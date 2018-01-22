@@ -65,11 +65,36 @@ namespace XmlDiff.Tests
         }
 
         [Test]
+        public void Xdt_ChildrenOfInsertedElementsHaveNoXdtAttributes()
+        {
+            var destDoc = new XDocument(_simpleDoc);
+            destDoc.Root.Add(new XElement("test",
+                new XElement("example", new XAttribute("value", "1")),
+                new XElement("example", new XAttribute("value", "2")),
+                new XElement("another",
+                    new XElement("example")
+                )
+            ));
+
+            DiffNode output = _xmlDiff.Compare(_simpleDoc.Root, destDoc.Root);
+
+            var visitor = new XdtVisitor();
+            visitor.VisitWithDefaultSettings(output);
+            var result = XDocument.Parse(visitor.Result);
+
+            // there should be a Transform on the new element
+            Assert.AreEqual(_FindXdtAttribute(result.Root.Element("test"), "Transform").Value, "Insert");
+            // there should be no XDT attributes on the children of the new element
+            Assert.IsTrue(result.Root.Element("test").HasElements);
+            Assert.IsFalse(result.Root.Element("test").Elements().Any(e => _FindXdtAttribute(e) != null));
+        }
+
+        [Test]
         public void Xdt_TestRemoveUniqueElement()
         {
             var destDoc = new XDocument(_simpleDoc);
             destDoc.Root.Element("appSettings").Remove();
-            
+
             DiffNode output = _xmlDiff.Compare(_simpleDoc.Root, destDoc.Root);
 
             var visitor = new XdtVisitor();
@@ -81,6 +106,8 @@ namespace XmlDiff.Tests
             // removed element should have a Transform but as it is unique, no Locator
             Assert.AreEqual(_FindXdtAttribute(result.Root.Element("appSettings"), "Transform").Value, "Remove");
             Assert.IsNull(_FindXdtAttribute(result.Root.Element("appSettings"), "Locator"));
+            // as it is being removed, it should have no children in the xdt
+            Assert.IsFalse(result.Root.Element("appSettings").HasElements);
         }
 
         [Test]
