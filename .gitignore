@@ -92,6 +92,7 @@ AppPackages/
 [Bb]in
 [Oo]bj
 sql
+sqlite3
 TestResults
 [Tt]est[Rr]esult*
 *.Cache

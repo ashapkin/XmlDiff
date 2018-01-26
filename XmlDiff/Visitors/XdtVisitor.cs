@@ -1,171 +1,166 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using System.Linq;
-using System.IO;
-//using System.Xml.XPath;
 
-namespace XmlDiff.Visitors
-{
-    class RemovedAttribute
-    {
-        public readonly XName Attribute;
+namespace XmlDiff.Visitors {
 
-        public RemovedAttribute(XName name)
-        {
-            this.Attribute = name;
-        }
-    }
+	public sealed class XdtContext {
 
-    class SetAttribute
-    {
-        public readonly XName Attribute;
+		private readonly HashSet<XName> _removedAttres = new HashSet<XName>();
+		private readonly HashSet<XName> _addedAttrs = new HashSet<XName>();
 
-        public SetAttribute(XName name)
-        {
-            this.Attribute = name;
-        }
-    }
+		public XElement CurrentElement { get; private set; }
 
-    class Utf8StringWriter : StringWriter
-    {
-        public Utf8StringWriter(StringBuilder builder) : base(builder) { }
-        public override Encoding Encoding { get { return Encoding.UTF8; } }
-    }
+		public IEnumerable<XName> RemoveAttrs {
+			get {
+				var remaining = new HashSet<XName>(_removedAttres);
+				remaining.ExceptWith(_addedAttrs);
+				return remaining;
+			}
+		}
 
-    public class XdtVisitor : IDiffVisitor
-    {
-        private readonly XDocument _xdt;
-        private XElement _CurrentElement;
-        public const string _XdtNamespaceUri = "http://schemas.microsoft.com/XML-Document-Transform";
+		public IEnumerable<XName> SetAttrs {
+			get { return _addedAttrs; }
+		}
 
-        public XdtVisitor()
-        {
-            this._xdt = new XDocument();
-        }
+		public IEnumerable<XName> Affected {
+			get { return _addedAttrs.Concat(_removedAttres); }
+		}
 
-        public string Result
-        {
-            get
-            {
+		public XdtContext(XElement element) {
+			CurrentElement = element;
+		}
 
-                // https://stackoverflow.com/a/3871822/4473405
-                var builder = new StringBuilder();
-                using (var writer = new Utf8StringWriter(builder))
-                {
-                    this._xdt.Save(writer);
-                }
-                return builder.ToString();
-            }
-        }
+		public void HandleAttr(XName attr, DiffAction diffAction) {
+			if (diffAction == DiffAction.Added) {
+				_addedAttrs.Add(attr);
+			}
+			if (!_addedAttrs.Contains(attr)) {
+				_removedAttres.Add(attr);
+			}
+		}
+	}
 
-        public void Visit(DiffAttribute attr)
-        {
-            if (attr.Action == DiffAction.Added)
-            {
-                this._CurrentElement.Add(attr.Raw);
-                this._CurrentElement.AddAnnotation(new SetAttribute(attr.Raw.Name));
-            } else
-            {
-                this._CurrentElement.AddAnnotation(new RemovedAttribute(attr.Raw.Name));
-            }
-        }
+	public class XdtVisitor : IDiffParamsVisitor<XdtContext> {
 
-        public void Visit(DiffValue val)
-        {
-            this._CurrentElement.SetValue(val.Raw);
-        }
+		public const string _XdtNamespaceUri = "http://schemas.microsoft.com/XML-Document-Transform";
+		private readonly XDocument _xdt;
 
-        public void Visit(DiffNode node)
-        {
-            // if there are no changes to this element or anything below it, and we have written the root element, then we have nothing to do
-            if (!node.IsChanged && this._CurrentElement != null)
-                return;
+		public XdtVisitor() {
+			_xdt = new XDocument();
+		}
 
-            XElement element = new XElement(node.Raw.Name);
-            if (this._CurrentElement == null)
-                this._xdt.Add(element);
-            else
-                this._CurrentElement.Add(element);
-            if (this._xdt.Root == element)
-            {
-                // add the XDT namespace declaration
-                element.Add(new XAttribute(XNamespace.Xmlns + "xdt", _XdtNamespaceUri));
-            }
-            var prev = this._CurrentElement;
-            this._CurrentElement = element;
-            try
-            {
-                switch (node.DiffAction)
-                {
-                    case DiffAction.Removed:
-                        element.SetAttributeValue(XName.Get("Transform", _XdtNamespaceUri), "Remove");
-                        break;
-                    case DiffAction.Added:
-                        foreach (var item in node.Raw.Attributes())
-                        {
-                            this._CurrentElement.Add(item);
-                        }
-                        this._CurrentElement.SetAttributeValue(XName.Get("Transform", _XdtNamespaceUri), "Insert");
-                        foreach (var item in node.Raw.Nodes())
-                            this._CurrentElement.Add(item);
-                        break;
-                    default:
-                        foreach (var item in node.Content)
-                        {
-                            item.Accept(this);
-                        }
-                        break;
-                }
-                var set = this._CurrentElement.Annotations(typeof(SetAttribute)).OfType<SetAttribute>().ToArray();
-                var remove = this._CurrentElement.Annotations(typeof(RemovedAttribute)).OfType<RemovedAttribute>().Where(a => !set.Any(s => s.Attribute == a.Attribute)).ToArray();
+		public void Visit(DiffAttribute attr, XdtContext param) {
+			param.HandleAttr(attr.Raw.Name, attr.Action);
+		}
 
-                if (node.DiffAction != DiffAction.Added)
-                {
-                    // find an attribute whose name and value is the same in both documents
-                    var unchanged_attributes = node.Raw.Attributes().Where(a => !set.Any(s => s.Attribute == a.Name) && !remove.Any(s => s.Attribute == a.Name)).ToArray();
-                    // restrict that to unique entires
-                    var prev_siblings_with_same_name = node.Raw.ElementsBeforeSelf().Where(e => e.Name == node.Raw.Name).ToArray();
-                    var next_siblings_with_same_name = node.Raw.ElementsAfterSelf().Where(e => e.Name == node.Raw.Name).ToArray();
-                    var siblings_with_same_name = prev_siblings_with_same_name.Concat(next_siblings_with_same_name);
-                    var unique_attributes = unchanged_attributes.Where(a => siblings_with_same_name.All(e => e.Attribute(a.Name)?.Value != a.Value));
-                    var unique_attribute = unchanged_attributes.FirstOrDefault();
-                    if (unique_attribute != null)
-                    {
-                        this._CurrentElement.Add(unique_attribute);
-                        this._CurrentElement.SetAttributeValue(XName.Get("Locator", _XdtNamespaceUri), "Match(" + unique_attribute.Name + ")");
-                    }
-                    else if (/*unchanged_attributes.Any() &&*/ siblings_with_same_name.Any())
-                    {
-                        // there is at least one other sibling element with the same name, so locate this element using an XPath Condition of the index
-                        this._CurrentElement.SetAttributeValue(XName.Get("Locator", _XdtNamespaceUri), "Condition([" + (prev_siblings_with_same_name.Count() + 1) + "])");
-                    } // otherwise, let the XDT transformer intelligently locate the correct element to transform
-                    if (set.Any())
-                        this._CurrentElement.SetAttributeValue(XName.Get("Transform", _XdtNamespaceUri), "SetAttributes(" + string.Join(",", set.Select(a => a.Attribute)) + ")");
-                    if (remove.Any())
-                    {
-                        if (set.Any())
-                        {
-                            var first = this._CurrentElement;
-                            // copy this element's name and xdt locator attribute, if present
-                            this._CurrentElement = new XElement(first.Name, first.Attribute(XName.Get("Locator", _XdtNamespaceUri)));
-                            first.AddAfterSelf(this._CurrentElement);
-                        }
-                        this._CurrentElement.SetAttributeValue(XName.Get("Transform", _XdtNamespaceUri), "RemoveAttributes(" + string.Join(",", remove.Select(a => a.Attribute)) + ")");
-                    }
-                }
-            }
-            finally
-            {
-                this._CurrentElement = prev;
-            }
-        }
+		public void Visit(DiffValue val, XdtContext param) {
+			param.CurrentElement.SetValue(val.Raw);
+			param.CurrentElement.SetAttributeValue(XdtElement("Transform"), "Replace");
+		}
 
-        public void VisitWithDefaultSettings(DiffNode node)
-        {
-            // TODO: should we reset internal variables / state so that the same visitor instance can be used for multiple diffs?
-            Visit(node);
-        }
-    }
+		public void Visit(DiffNode node, XdtContext param) {
+			if (!node.IsChanged)
+				return;
+
+			XdtContext context = YieldCurrentContext(node);
+			param.CurrentElement.Add(context.CurrentElement);
+
+			if (node.DiffAction != DiffAction.Added) {
+				string locator = GetLocator(node, context.Affected);
+				if (locator != null) {
+					context.CurrentElement.SetAttributeValue(XdtElement("Locator"), locator);
+				}
+
+				if (context.RemoveAttrs.Any()) {
+					context.CurrentElement.SetAttributeValue(XdtElement("Transform"), "RemoveAttributes(" + string.Join(",", context.RemoveAttrs) + ")");
+				}
+				if (context.SetAttrs.Any()) {
+					GetNodeToAddAttributes(context).SetAttributeValue(XdtElement("Transform"), "SetAttributes(" + string.Join(",", context.SetAttrs) + ")");
+				}
+			}
+		}
+
+		private XElement GetNodeToAddAttributes(XdtContext newContent) {
+			if (newContent.RemoveAttrs.Any()) {
+				var copy = new XElement(newContent.CurrentElement.Name, newContent.CurrentElement.Attributes());
+				newContent.CurrentElement.AddAfterSelf(copy);
+				return copy;
+			}
+			return newContent.CurrentElement;
+		}
+
+		private string GetLocator(DiffNode node, IEnumerable<XName> affectedAttrs) {
+			// todo: let's use an indexed locator always?
+			// pros: less code/logic + it's hard to locate some changes <node attr="123"... to <node attr="newVal"...
+			// cons: transformation becomes hard to read?
+			XElement[] prevSiblingsWithSameName = node.Raw.ElementsBeforeSelf().Where(e => e.Name == node.Raw.Name).ToArray();
+			XElement[] nextSiblingsWithSameName = node.Raw.ElementsAfterSelf().Where(e => e.Name == node.Raw.Name).ToArray();
+			XElement[] siblingsWithSameName = prevSiblingsWithSameName.Concat(nextSiblingsWithSameName).ToArray();
+			if (siblingsWithSameName.Length == 0) {
+				return null;
+			}
+
+			XName[] uniqueAttrNames = node.Raw.Attributes()
+				.Where(a => siblingsWithSameName.All(e => e.Attribute(a.Name)?.Value != a.Value))
+				.Select(x => x.Name)
+				.Except(affectedAttrs).ToArray();
+			return uniqueAttrNames.Length == 0
+					? "Condition([" + (prevSiblingsWithSameName.Length + 1) + "])"
+					: "Match(" + uniqueAttrNames[0] + ")";
+		}
+
+		private XdtContext YieldCurrentContext(DiffNode node) {
+			if (node.DiffAction == DiffAction.Added) {
+				var elem = new XElement(node.Raw);
+				elem.SetAttributeValue(XdtElement("Transform"), "Insert");
+				return new XdtContext(elem);
+			}
+
+			var newElement = new XElement(node.Raw.Name, node.Raw.Attributes());
+			var newContext = new XdtContext(newElement);
+			if (node.DiffAction == DiffAction.Removed) {
+				newElement.SetAttributeValue(XdtElement("Transform"), "Remove");
+			} else {
+				foreach (DiffContent item in node.Content) {
+					item.Accept(this, newContext);
+				}
+			}
+			return newContext;
+		}
+
+		private static XName XdtElement(string name) {
+			return XName.Get(name, _XdtNamespaceUri);
+		}
+
+		// refactor later
+		public void VisitWithDefaultSettings(DiffNode node) {
+			// TODO: should we reset internal variables / state so that the same visitor instance can be used for multiple diffs?
+			// I think we need change interface
+			var initial = new XdtContext(new XElement("Temp"));
+			Visit(node, initial);
+			XElement res = initial.CurrentElement.Nodes().OfType<XElement>().First();
+			res.Add(new XAttribute(XNamespace.Xmlns + "xdt", _XdtNamespaceUri));
+			_xdt.Add(res);
+		}
+
+		public string Result {
+			get {
+				// https://stackoverflow.com/a/3871822/4473405
+				var builder = new StringBuilder();
+				using (var writer = new Utf8StringWriter(builder)) {
+					_xdt.Save(writer);
+				}
+				return builder.ToString();
+			}
+		}
+
+		private sealed class Utf8StringWriter : StringWriter {
+			public Utf8StringWriter(StringBuilder builder) : base(builder) { }
+			public override Encoding Encoding { get { return Encoding.UTF8; } }
+		}
+	}
 }
