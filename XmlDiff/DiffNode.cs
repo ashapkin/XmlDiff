@@ -16,10 +16,7 @@ namespace XmlDiff
 
 		public DiffNode(XElement raw, IEnumerable<DiffContent> content)
 		{
-			if (raw == null)
-				throw new ArgumentNullException("raw");
-
-			Raw = raw;
+			Raw = raw ?? throw new ArgumentNullException(nameof(raw));
 			Content = content ?? Enumerable.Empty<DiffContent>();
 		}
 

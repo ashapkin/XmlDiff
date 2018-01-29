@@ -8,6 +8,7 @@ namespace XmlDiff.Visitors
 	{
 		protected readonly int MaxAttributesPreviewCount = 2;
 		private readonly StringBuilder _sb = new StringBuilder();
+		public int Initial { get { return 0; } }
 
 		public string Result
 		{
@@ -45,9 +46,9 @@ namespace XmlDiff.Visitors
 			}
 		}
 
-		public void VisitWithDefaultSettings(DiffNode node)
+		public void Visit(DiffNode node)
 		{
-			Visit(node, 0);
+			Visit(node, Initial);
 		}
 
 		private void AppendRawAttributesToSb(DiffNode node, StringBuilder sb)
@@ -57,6 +58,10 @@ namespace XmlDiff.Visitors
 				foreach (XAttribute attr in node.Raw.Attributes().Take(MaxAttributesPreviewCount))
 				{
 					sb.AppendFormat(" \"{0}\"=\"{1}\"", attr.Name, attr.Value);
+				}
+				if (node.Raw.Attributes().Count() > MaxAttributesPreviewCount)
+				{
+					sb.AppendFormat("...");
 				}
 			}
 		}
@@ -74,16 +79,15 @@ namespace XmlDiff.Visitors
 
 		private static string ActionToString(DiffAction? diffAction)
 		{
-			if (diffAction == DiffAction.Added)
+			switch (diffAction)
 			{
-				return "+";
+				case DiffAction.Added:
+					return "+";
+				case DiffAction.Removed:
+					return "-";
+				default:
+					return "=";
 			}
-			if (diffAction == DiffAction.Removed)
-			{
-				return "-";
-			}
-
-			return "=";
 		}
 	}
 }
