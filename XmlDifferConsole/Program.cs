@@ -63,7 +63,9 @@ namespace XmlDifferConsole
 
             var comparer = new XmlComparer();
             var diff = comparer.Compare(leftDoc.Root, rightDoc.Root);
-            var isChanged = diff.IsChanged;
+            if (!diff.IsChanged && opt.Verbose) {
+                Console.WriteLine("No changes detected!");
+            }
 
             if (opt.Verbose)
                 Console.WriteLine("Compared in {0} ms.", stopwatch.ElapsedMilliseconds);

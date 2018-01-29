@@ -167,6 +167,21 @@ namespace XmlDiff.Tests
             Assert.AreEqual("SomeVal", result.Root.Element("appSettings").Elements().First().Value);
         }
 
+        [Test]
+        public void Xdt_TestSetAndRemoveAttributes() {
+            var destDoc = new XDocument(_simpleDoc);
+            destDoc.Root.Element("appSettings").Elements().First().SetAttributeValue("value", "baz");
+            destDoc.Root.Element("appSettings").Elements().First().Attributes("key").Remove();
+            DiffNode output = _xmlDiff.Compare(_simpleDoc.Root, destDoc.Root);
+
+            var visitor = new XdtVisitor();
+            visitor.Visit(output);
+            var result = XDocument.Parse(visitor.Result);
+            Assert.AreEqual(2, result.Root.Element("appSettings").Elements().Count());
+            Assert.AreEqual("SetAttributes(value)", _FindXdtAttribute(result.Root.Element("appSettings").Elements().First(), "Transform").Value);
+            Assert.AreEqual("RemoveAttributes(key)", _FindXdtAttribute(result.Root.Element("appSettings").Elements().Last(), "Transform").Value);
+        }
+
         private XAttribute _FindXdtAttribute(XElement element, string name = null)
         {
             var attrs = element.Attributes().Where(a => !a.IsNamespaceDeclaration).Where(a => a.Name.NamespaceName == XdtVisitor.XdtNamespaceUri);

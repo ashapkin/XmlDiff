@@ -113,9 +113,7 @@ namespace XmlDiff.Visitors {
 			if (!source.Attributes(XdtElement("Transform")).Any()) {
 				return source;
 			}
-			var copy = new XElement(source.Name, source.Attributes());
-			source.AddAfterSelf(copy);
-			return copy;
+			return new XElement(source.Name, source.Attributes());
 		}
 
 		private string GetLocator(DiffNode node, XdtContext context) {
