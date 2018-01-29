@@ -36,6 +36,8 @@ namespace XmlDiff.Visitors
 			get { return _sb.ToString(); }
 		}
 
+		public int Initial { get { return 0; } }
+
 		public void Visit(DiffAttribute attr, int param)
 		{
 			_sb.AppendFormat("<span{0}>\"{1}\"=\"{2}\"</span>",
@@ -83,9 +85,9 @@ namespace XmlDiff.Visitors
 			}
 		}
 
-		public void VisitWithDefaultSettings(DiffNode node)
+		public void Visit(DiffNode node)
 		{
-			Visit(node, 0);
+			Visit(node, Initial);
 			_sb.Append("</body>");
 		}
 

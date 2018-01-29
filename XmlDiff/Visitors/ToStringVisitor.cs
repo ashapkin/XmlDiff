@@ -8,6 +8,7 @@ namespace XmlDiff.Visitors
 	{
 		protected readonly int MaxAttributesPreviewCount = 2;
 		private readonly StringBuilder _sb = new StringBuilder();
+		public int Initial { get { return 0; } }
 
 		public string Result
 		{
@@ -45,9 +46,9 @@ namespace XmlDiff.Visitors
 			}
 		}
 
-		public void VisitWithDefaultSettings(DiffNode node)
+		public void Visit(DiffNode node)
 		{
-			Visit(node, 0);
+			Visit(node, Initial);
 		}
 
 		private void AppendRawAttributesToSb(DiffNode node, StringBuilder sb)

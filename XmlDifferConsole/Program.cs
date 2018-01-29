@@ -77,7 +77,7 @@ namespace XmlDifferConsole
                 }
 
                 var visitor = new HtmlVisitor();
-                visitor.VisitWithDefaultSettings(diff);
+                visitor.Visit(diff);
 
                 if (opt.Verbose)
                     Console.WriteLine("Writing HTML output to \"{0}\"...", opt.OutputHtmlFile);
@@ -96,7 +96,7 @@ namespace XmlDifferConsole
                 }
 
                 var visitor = new XdtVisitor();
-                visitor.VisitWithDefaultSettings(diff);
+                visitor.Visit(diff);
 
                 if (opt.Verbose)
                     Console.WriteLine("Writing XDT output to \"{0}\"...", opt.OutputXdtFile);
@@ -112,7 +112,7 @@ namespace XmlDifferConsole
             if (opt.Verbose || (string.IsNullOrEmpty(opt.OutputHtmlFile) && string.IsNullOrEmpty(opt.OutputXdtFile)))
             {
                 var vistor = new ToStringVisitor();
-                vistor.VisitWithDefaultSettings(diff);
+                vistor.Visit(diff);
                 Console.WriteLine(vistor.Result);
             }
         }

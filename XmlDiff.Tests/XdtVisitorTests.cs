@@ -25,13 +25,13 @@ namespace XmlDiff.Tests
             DiffNode output = _xmlDiff.Compare(_simpleDoc.Root, new XDocument(_simpleDoc).Root);
 
             var visitor = new XdtVisitor();
-            visitor.VisitWithDefaultSettings(output);
+            visitor.Visit(output);
             var result = XDocument.Parse(visitor.Result);
 
             // document should have a root element with the same name as in the original document
             Assert.AreEqual(result.Root.Name, _simpleDoc.Root.Name);
             // that root element should have the xdt prefix namespace
-            Assert.AreEqual(result.Root.GetPrefixOfNamespace(XdtVisitor._XdtNamespaceUri), "xdt");
+            Assert.AreEqual(result.Root.GetPrefixOfNamespace(XdtVisitor.XdtNamespaceUri), "xdt");
             // that root element should be empty, as there are no differences
             Assert.IsFalse(result.Root.HasElements);
         }
@@ -46,7 +46,7 @@ namespace XmlDiff.Tests
             DiffNode output = _xmlDiff.Compare(_simpleDoc.Root, destDoc.Root);
 
             var visitor = new XdtVisitor();
-            visitor.VisitWithDefaultSettings(output);
+            visitor.Visit(output);
             var result = XDocument.Parse(visitor.Result);
 
             // root element should have no locator or transformation
@@ -79,7 +79,7 @@ namespace XmlDiff.Tests
             DiffNode output = _xmlDiff.Compare(_simpleDoc.Root, destDoc.Root);
 
             var visitor = new XdtVisitor();
-            visitor.VisitWithDefaultSettings(output);
+            visitor.Visit(output);
             var result = XDocument.Parse(visitor.Result);
 
             // there should be a Transform on the new element
@@ -98,7 +98,7 @@ namespace XmlDiff.Tests
             DiffNode output = _xmlDiff.Compare(_simpleDoc.Root, destDoc.Root);
 
             var visitor = new XdtVisitor();
-            visitor.VisitWithDefaultSettings(output);
+            visitor.Visit(output);
             var result = XDocument.Parse(visitor.Result);
 
             // root element should have no locator or transformation
@@ -122,7 +122,7 @@ namespace XmlDiff.Tests
             DiffNode output = _xmlDiff.Compare(sourceDoc.Root, destDoc.Root);
 
             var visitor = new XdtVisitor();
-            visitor.VisitWithDefaultSettings(output);
+            visitor.Visit(output);
             var result = XDocument.Parse(visitor.Result);
 
             // root element should have no locator or transformation
@@ -142,7 +142,7 @@ namespace XmlDiff.Tests
             DiffNode output = _xmlDiff.Compare(_simpleDoc.Root, destDoc.Root);
 
             var visitor = new XdtVisitor();
-            visitor.VisitWithDefaultSettings(output);
+            visitor.Visit(output);
             var result = XDocument.Parse(visitor.Result);
 
             // set and remove isn't possible in one go, so should be two instances with the same locator
@@ -153,9 +153,23 @@ namespace XmlDiff.Tests
             Assert.AreEqual(_FindXdtAttribute(second, "Transform").Value, "RemoveAttributes(value)");
         }
 
+        [Test]
+        public void Xdt_TestChangedValue() {
+            var destDoc = new XDocument(_simpleDoc);
+            destDoc.Root.Element("appSettings").Elements().First().Value = "SomeVal";
+            DiffNode output = _xmlDiff.Compare(_simpleDoc.Root, destDoc.Root);
+
+            var visitor = new XdtVisitor();
+            visitor.Visit(output);
+            var result = XDocument.Parse(visitor.Result);
+            Assert.AreEqual("Replace", _FindXdtAttribute(result.Root.Element("appSettings").Elements().First(), "Transform").Value);
+            Assert.AreEqual(1, result.Root.Element("appSettings").Elements().Count());
+            Assert.AreEqual("SomeVal", result.Root.Element("appSettings").Elements().First().Value);
+        }
+
         private XAttribute _FindXdtAttribute(XElement element, string name = null)
         {
-            var attrs = element.Attributes().Where(a => !a.IsNamespaceDeclaration).Where(a => a.Name.NamespaceName == XdtVisitor._XdtNamespaceUri);
+            var attrs = element.Attributes().Where(a => !a.IsNamespaceDeclaration).Where(a => a.Name.NamespaceName == XdtVisitor.XdtNamespaceUri);
             return attrs.FirstOrDefault(a => a.Name.LocalName == name || string.IsNullOrEmpty(name));
         }
     }
