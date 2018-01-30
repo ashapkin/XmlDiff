@@ -43,37 +43,7 @@ Default output for ```diff.ToString()```
 
 Prettified version
 
-<div>
-    <div>
-        <span>&lt;configuration</span>&gt;</div>
-    <div>
-        <span class="indent">&rarr;</span><span>&lt;appSettings</span>&gt;</div>
-    <div>
-        <span class="indent">&rarr;</span><span class="indent">&rarr;</span><span>&lt;add</span><span
-            style="background-color : #ffe6e6; text-decoration:line-through;"> "key"="example"</span><span
-            style="background-color : #ffe6e6; text-decoration:line-through;"> "value"="baz"</span><span
-            style="background-color : #e6ffe6;"> "key"="bar"</span>&gt;</div>
-    <div>
-        <span class="indent">&rarr;</span><span class="indent">&rarr;</span><span>&lt;/add&gt;</span></div>
-    <div>
-    </div>
-    <div>
-        <span class="indent">&rarr;</span><span class="indent">&rarr;</span><span>&lt;add</span><span
-            style="background-color : #ffe6e6; text-decoration:line-through;"> "value"="world"</span><span
-            style="background-color : #e6ffe6;"> "value"="new"</span>&gt;</div>
-    <div>
-        <span class="indent">&rarr;</span><span class="indent">&rarr;</span><span>&lt;/add&gt;</span></div>
-    <div>
-    </div>
-    <div>
-        <span class="indent">&rarr;</span><span>&lt;/appSettings&gt;</span></div>
-    <div>
-    </div>
-    <div>
-        <span>&lt;/configuration&gt;</span></div>
-    <div>
-    </div>
-</div>
+![HtmlVisitor example](htmlvisitor.png)
 
 ### XdtVisitor
 Generates  [XML Document Transformation file](https://msdn.microsoft.com/en-us/library/dd465326%28v=vs.110%29.aspx?f=255&MSPPError=-2147217396)
