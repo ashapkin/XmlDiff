@@ -24,6 +24,7 @@ return visitor.Result;
 
 ### ToStringVisitor 
 Default output for ```diff.ToString()```
+
 ```
 = Element "configuration"
 ...= Element "applicationSettings"
@@ -40,24 +41,38 @@ Default output for ```diff.ToString()```
 ```
 ### HtmlVisitor 
 
-<div><style type="text/css">
-span { margin:5px;}
-.removed { background-color : #ffe6e6; text-decoration:line-through; }
-.added { background-color : #e6ffe6; }
-</style>
+Prettified version
+
 <div>
-<span>&lt;configuration</span>&gt;</div><div>
-<span class="indent">&rarr;</span><span>&lt;appSettings</span>&gt;</div><div>
-<span class="indent">&rarr;</span><span class="indent">&rarr;</span><span>&lt;add</span><span class="removed">"key"="example"</span><span class="removed">"value"="baz"</span><span class="added">"key"="bar"</span>&gt;</div><div>
-<span class="indent">&rarr;</span><span class="indent">&rarr;</span><span>&lt;/add&gt;</span></div><div>
-</div><div>
-<span class="indent">&rarr;</span><span class="indent">&rarr;</span><span>&lt;add</span><span class="removed">"value"="world"</span><span class="added">"value"="new"</span>&gt;</div><div>
-<span class="indent">&rarr;</span><span class="indent">&rarr;</span><span>&lt;/add&gt;</span></div><div>
-</div><div>
-<span class="indent">&rarr;</span><span>&lt;/appSettings&gt;</span></div><div>
-</div><div>
-<span>&lt;/configuration&gt;</span></div><div>
-</div>
+    <div>
+        <span>&lt;configuration</span>&gt;</div>
+    <div>
+        <span class="indent">&rarr;</span><span>&lt;appSettings</span>&gt;</div>
+    <div>
+        <span class="indent">&rarr;</span><span class="indent">&rarr;</span><span>&lt;add</span><span
+            style="background-color : #ffe6e6; text-decoration:line-through;"> "key"="example"</span><span
+            style="background-color : #ffe6e6; text-decoration:line-through;"> "value"="baz"</span><span
+            style="background-color : #e6ffe6;"> "key"="bar"</span>&gt;</div>
+    <div>
+        <span class="indent">&rarr;</span><span class="indent">&rarr;</span><span>&lt;/add&gt;</span></div>
+    <div>
+    </div>
+    <div>
+        <span class="indent">&rarr;</span><span class="indent">&rarr;</span><span>&lt;add</span><span
+            style="background-color : #ffe6e6; text-decoration:line-through;"> "value"="world"</span><span
+            style="background-color : #e6ffe6;"> "value"="new"</span>&gt;</div>
+    <div>
+        <span class="indent">&rarr;</span><span class="indent">&rarr;</span><span>&lt;/add&gt;</span></div>
+    <div>
+    </div>
+    <div>
+        <span class="indent">&rarr;</span><span>&lt;/appSettings&gt;</span></div>
+    <div>
+    </div>
+    <div>
+        <span>&lt;/configuration&gt;</span></div>
+    <div>
+    </div>
 </div>
 
 ### XdtVisitor
@@ -65,8 +80,7 @@ Generates  [XML Document Transformation file](https://msdn.microsoft.com/en-us/l
 ```
 <configuration>
     <appSettings>
-        <add key="bar" xdt:Locator="Condition([1])" xdt:Transform="SetAttributes(key)" />
-        <add key="bar" xdt:Locator="Condition([1])" xdt:Transform="RemoveAttributes(value)" />
+        <add key="bar" xdt:Transform="SetAttributes(key)" />
         <add key="hello" value="new" xdt:Locator="Match(key)" xdt:Transform="SetAttributes(value)" />
     </appSettings>
 </configuration>
@@ -74,7 +88,7 @@ Generates  [XML Document Transformation file](https://msdn.microsoft.com/en-us/l
 
 ## Custom Visitors
 
-In order to implement your own visitor you need to implement `IDiffVisitor` or `IDiffParamsVisitor`. 
+In order to create your own visitor you need to implement `IDiffVisitor` or `IDiffParamsVisitor` interface 
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
